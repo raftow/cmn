@@ -123,7 +123,7 @@ class Domain extends AFWObject
                   unset($link);
                   $my_id = $this->getId();
                   $link = array();
-                  $title = "إدارة المسؤوليات  الوظيفية ";
+                  $title = "إدارة الصلاحيات  الوظيفية ";
                   $title_detailed = $title . "لـ : " . $displ;
                   $link["URL"] = "main.php?Main_Page=afw_mode_qedit.php&cl=Jobrole&currmod=ums&id_origin=$my_id&class_origin=Domain&module_origin=cmn&newo=10&limit=30&ids=all&fixmtit=$title_detailed&fixmdisable=1&fixm=id_domain=$my_id&sel_id_domain=$my_id";
                   $link["TITLE"] = $title;
@@ -135,13 +135,26 @@ class Domain extends AFWObject
                   unset($link);
                   $my_id = $this->getId();
                   $link = array();
+                  $title = "إضافة هدف جديد";
+                  $title_detailed = $title . "لـ : " . $displ;
+                  $link["URL"] = "main.php?Main_Page=afw_mode_edit.php&cl=Goal&currmod=bau&id_origin=$my_id&class_origin=Domain&module_origin=cmn&sel_domain_id=$my_id";
+                  $link["TITLE"] = $title;
+                  $link["UGROUPS"] = array();
+                  $otherLinksArray[] = $link;
+            }
+
+            /*
+            if ($mode == "mode_goalList") {
+                  unset($link);
+                  $my_id = $this->getId();
+                  $link = array();
                   $title = "إدارة الأهداف ";
                   $title_detailed = $title . "لـ : " . $displ;
                   $link["URL"] = "main.php?Main_Page=afw_mode_qedit.php&cl=Goal&currmod=bau&id_origin=$my_id&class_origin=Domain&module_origin=cmn&newo=3&limit=30&ids=all&fixmtit=$title_detailed&fixmdisable=1&fixm=domain_id=$my_id&sel_domain_id=$my_id";
                   $link["TITLE"] = $title;
                   $link["UGROUPS"] = array();
                   $otherLinksArray[] = $link;
-            }
+            }*/
 
 
 
@@ -154,7 +167,7 @@ class Domain extends AFWObject
             $pbms = array();
 
             $color = "green";
-            $title_ar = "توليد المسؤوليات النموذجية";
+            $title_ar = "توليد الصلاحيات النموذجية";
             $pbms["xab5cB"] = array("METHOD" => "createStandardJobResp", "COLOR" => $color, "LABEL_AR" => $title_ar, "ADMIN-ONLY" => true, "BF-ID" => "");
 
 
@@ -202,7 +215,7 @@ class Domain extends AFWObject
             $jrObj = Jobrole::loadByMainIndex($this->getId(), $code_jr, $create_obj_if_not_found);
             if ($jrObj->is_new or $always_update_name) {
                   $jrObj->set("titre_en", $this->getShortDisplay("en") . " employee common responsibility");
-                  $jrObj->set("titre", "مسؤوليات موظف " . $this->getShortDisplay("ar"));
+                  $jrObj->set("titre", "صلاحيات موظف " . $this->getShortDisplay("ar"));
                   $jrObj->set("titre_short_en", $this->getShortDisplay("en") . " employee  ");
                   $jrObj->set("titre_short", "موظف " . $this->getShortDisplay("ar"));
                   $jrObj->update();
@@ -294,8 +307,8 @@ class Domain extends AFWObject
                   case "mainApplication":
 
                         $application_code = strtolower($this->getVal("application_code"));
-                        if (!$application_code) {
                               $domain_code = strtolower($this->getVal("domain_code"));
+                        if (!$application_code) {
                               $application_code = $domain_code . "u";
                         }
 
