@@ -168,11 +168,70 @@ class Domain extends AFWObject
 
             $color = "green";
             $title_ar = "توليد الصلاحيات النموذجية";
-            $pbms["xab5cB"] = array("METHOD" => "createStandardJobResp", "COLOR" => $color, "LABEL_AR" => $title_ar, "ADMIN-ONLY" => true, "BF-ID" => "");
+            $pbms["xab5cB"] = array(
+                  "METHOD" => "createStandardJobResp",
+                  "COLOR" => $color,
+                  "LABEL_AR" => $title_ar,
+                  "ADMIN-ONLY" => true,
+                  "BF-ID" => ""
+            );
+
+            $color = 'blue';
+            $title_ar = "توليد الأهداف الأصلية";
+            $methodName = 'generateOriginalGoals';
+            $pbms[AfwStringHelper::hzmEncode($methodName)] =
+                        array(
+                              'METHOD' => $methodName,
+                              'COLOR' => $color,
+                              'LABEL_AR' => $title_ar,
+                              'ADMIN-ONLY' => true,
+                              'BF-ID' => '',
+                              'TITLE-LENGTH' => 72,
+                              // 'STEP' => $this->stepOfAttribute('employee_id')
+                        );
 
 
             return $pbms;
       }
+
+      public function generateOriginalGoals($lang = "ar")
+      {
+            $jobroleList = $this->get("jobroleList");
+            $objModule = $this->get("mainApplication");
+            if (!$objModule or (!$objModule->id)) return ["generateOriginalGoals : main application not found",""];
+            $objModule_id = $objModule->id;
+            $system_id = $objModule->getVal("id_system");
+            $nb_add = 0;
+            $nb_upd = 0;
+            foreach($jobroleList as $jobroleItem) {
+                  $object_name_ar = $jobroleItem->getVal("titre_short"); 
+                  $object_name_en = $jobroleItem->getVal("titre_short_en");
+                  $object_title_ar = $jobroleItem->getVal("titre"); 
+                  $object_title_en = $jobroleItem->getVal("titre_en");
+
+                  $jobrole_code = $jobroleItem->getVal("jobrole_code");
+                  if(AfwStringHelper::stringStartsWith($jobrole_code,"jr-")) {
+                        $goal_code = substr($jobrole_code,3);
+                        $objGoal = Goal::loadByMainIndex($system_id, $objModule_id, $goal_code, true);
+                        if(!$objGoal) return ["generateOriginalGoals : Goal creation with loadByMainIndex($system_id,$objModule_id, $goal_code, true) failed", ""];
+
+                        if($objGoal->is_new) $nb_add++; else $nb_upd++;
+                        $objGoal->set('goal_type_id', Goal::$GOAL_TYPE_JOB_RESPONSIBILITY_GOAL);
+                        $objGoal->set('domain_id', $this->id);
+                        $objGoal->set('goal_name_en', $object_name_en);
+                        $objGoal->set('goal_name_ar', $object_name_ar);
+                        $objGoal->set('goal_desc_en', $object_title_en);
+                        $objGoal->set('goal_desc_ar', $object_title_ar);
+
+                        $objGoal->set('jobrole_id', $jobroleItem->id);
+                        $objGoal->commit();
+                  }
+            }
+
+            return ["", "$nb_add goal(s) added and $nb_upd goal(s) updated"];
+
+      }
+
 
       public function createStandardJobResp($lang = "ar")
       {
@@ -307,7 +366,7 @@ class Domain extends AFWObject
                   case "mainApplication":
 
                         $application_code = strtolower($this->getVal("application_code"));
-                              $domain_code = strtolower($this->getVal("domain_code"));
+                        $domain_code = strtolower($this->getVal("domain_code"));
                         if (!$application_code) {
                               $application_code = $domain_code . "u";
                         }
