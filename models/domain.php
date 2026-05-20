@@ -287,7 +287,9 @@ class Domain extends AFWObject
       public function getDataJobResp($create_obj_if_not_found = true, $always_update_name = false)
       {
             $lang = AfwLanguageHelper::getGlobalLanguage();
-
+            /**
+             * @var Module $mainApplication
+             */
             $mainApplication = $this->get("mainApplication");
             if (!$mainApplication) return array(null, null, "no main application defined");
             if ($mainApplication->getVal("id_pm") != $this->getId()) return array(null, null, "id of domain in main application is different than this DOMAIN-ID");
@@ -301,6 +303,10 @@ class Domain extends AFWObject
       {
             $lang = AfwLanguageHelper::getGlobalLanguage();
 
+            /**
+             * @var Module $mainApplication
+             */
+            
             $mainApplication = $this->get("mainApplication");
             if (!$mainApplication) return array(null, null, "no main application defined");
             if ($mainApplication->getVal("id_pm") != $this->getId()) return array(null, null, "id of domain in main application is different than this DOMAIN-ID");
