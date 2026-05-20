@@ -306,7 +306,7 @@ class Domain extends AFWObject
             /**
              * @var Module $mainApplication
              */
-            
+
             $mainApplication = $this->get("mainApplication");
             if (!$mainApplication) return array(null, null, "no main application defined");
             if ($mainApplication->getVal("id_pm") != $this->getId()) return array(null, null, "id of domain in main application is different than this DOMAIN-ID");
@@ -387,5 +387,49 @@ class Domain extends AFWObject
                         return $mainApplication;
                         break;
             }
+      }
+
+      /**
+         * @param int $atable_id
+         */
+      public function tableIsManagedByAtLeastOneGoal($atable_id) {
+            $goalList = $this->get("goalList");
+            /**
+             * @var Goal $goalItem
+             */
+            foreach($goalList as $goalItem) {
+                  if($goalItem->tableIsManaged($atable_id)) return true;
+            }
+
+            return false;
+      }
+
+
+      public function calcNon_managed_tables($what="value") {
+            /**
+             * @var Module $mainApplication
+             */
+
+            $mainApplication = $this->get("mainApplication");
+            if (!$mainApplication) return "no main application defined";
+
+            $return_html = "";
+            $table_html = "";
+            $lookup_html = "";
+            // tables
+            $tableList = $mainApplication->get("tbs");
+            foreach($tableList as $tableItem) {
+                  $table_html .= $tableItem->getVal("atable_name").", ";      
+            }
+
+            // lookups
+            $lookupList = $mainApplication->get("lkps");
+            foreach($lookupList as $tableItem) {
+                  $lookup_html .= $tableItem->getVal("atable_name").", ";      
+            }
+
+            if($table_html) $return_html .= "TABLES NOT MANAGED : $table_html <BR>\n";
+            if($lookup_html) $return_html .= "LOOKUPS NOT MANAGED : $lookup_html <BR>\n";
+            if(!$return_html) $return_html = "well done all is managed";
       }
 }

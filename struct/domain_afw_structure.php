@@ -204,6 +204,18 @@ class CmnDomainAfwStructure
 			'EDIT-UGROUPS' => '',
 		),
 
+		'non_managed_tables' => array(
+                        'STEP' => 3,
+                        'TYPE' => 'TEXT',
+                        'CATEGORY' => 'FORMULA',
+                        'SHOW' => true,
+                        'EDIT' => true,
+                        'READONLY' => true,
+                        'CAN-BE-SETTED' => false,
+                        'SIZE' => 255,
+                        'CSS' => 'width_pct_100',
+                ),
+
 		'avail' => array(
 			'IMPORTANT' => 'IN',
 			'SHOW-ADMIN' => true,
