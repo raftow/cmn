@@ -431,5 +431,7 @@ class Domain extends AFWObject
             if($table_html) $return_html .= "TABLES NOT MANAGED : $table_html <BR>\n";
             if($lookup_html) $return_html .= "LOOKUPS NOT MANAGED : $lookup_html <BR>\n";
             if(!$return_html) $return_html = "well done all is managed";
+
+            return $return_html;
       }
 }
