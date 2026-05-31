@@ -180,15 +180,15 @@ class Domain extends AFWObject
             $title_ar = "توليد الأهداف الأصلية";
             $methodName = 'generateOriginalGoals';
             $pbms[AfwStringHelper::hzmEncode($methodName)] =
-                        array(
-                              'METHOD' => $methodName,
-                              'COLOR' => $color,
-                              'LABEL_AR' => $title_ar,
-                              'ADMIN-ONLY' => true,
-                              'BF-ID' => '',
-                              'TITLE-LENGTH' => 72,
-                              // 'STEP' => $this->stepOfAttribute('employee_id')
-                        );
+                  array(
+                        'METHOD' => $methodName,
+                        'COLOR' => $color,
+                        'LABEL_AR' => $title_ar,
+                        'ADMIN-ONLY' => true,
+                        'BF-ID' => '',
+                        'TITLE-LENGTH' => 72,
+                        // 'STEP' => $this->stepOfAttribute('employee_id')
+                  );
 
 
             return $pbms;
@@ -197,25 +197,26 @@ class Domain extends AFWObject
       public function generateOriginalGoals($lang = "ar")
       {
             $jobroleList = $this->get("jobroleList");
-            $objModule = $this->get("mainApplication");
-            if (!$objModule or (!$objModule->id)) return ["generateOriginalGoals : main application not found",""];
+            $objModule = $this->calcMainApplication();
+            if (!$objModule or (!$objModule->id)) return ["generateOriginalGoals : main application not found", ""];
             $objModule_id = $objModule->id;
             $system_id = $objModule->getVal("id_system");
             $nb_add = 0;
             $nb_upd = 0;
-            foreach($jobroleList as $jobroleItem) {
-                  $object_name_ar = $jobroleItem->getVal("titre_short"); 
+            foreach ($jobroleList as $jobroleItem) {
+                  $object_name_ar = $jobroleItem->getVal("titre_short");
                   $object_name_en = $jobroleItem->getVal("titre_short_en");
-                  $object_title_ar = $jobroleItem->getVal("titre"); 
+                  $object_title_ar = $jobroleItem->getVal("titre");
                   $object_title_en = $jobroleItem->getVal("titre_en");
 
                   $jobrole_code = $jobroleItem->getVal("jobrole_code");
-                  if(AfwStringHelper::stringStartsWith($jobrole_code,"jr-")) {
-                        $goal_code = substr($jobrole_code,3);
+                  if (AfwStringHelper::stringStartsWith($jobrole_code, "jr-")) {
+                        $goal_code = substr($jobrole_code, 3);
                         $objGoal = Goal::loadByMainIndex($system_id, $objModule_id, $goal_code, true);
-                        if(!$objGoal) return ["generateOriginalGoals : Goal creation with loadByMainIndex($system_id,$objModule_id, $goal_code, true) failed", ""];
+                        if (!$objGoal) return ["generateOriginalGoals : Goal creation with loadByMainIndex($system_id,$objModule_id, $goal_code, true) failed", ""];
 
-                        if($objGoal->is_new) $nb_add++; else $nb_upd++;
+                        if ($objGoal->is_new) $nb_add++;
+                        else $nb_upd++;
                         $objGoal->set('goal_type_id', Goal::$GOAL_TYPE_JOB_RESPONSIBILITY_GOAL);
                         $objGoal->set('domain_id', $this->id);
                         $objGoal->set('goal_name_en', $object_name_en);
@@ -229,7 +230,6 @@ class Domain extends AFWObject
             }
 
             return ["", "$nb_add goal(s) added and $nb_upd goal(s) updated"];
-
       }
 
 
@@ -290,7 +290,7 @@ class Domain extends AFWObject
             /**
              * @var Module $mainApplication
              */
-            $mainApplication = $this->get("mainApplication");
+            $mainApplication = $this->calcMainApplication();
             if (!$mainApplication) return array(null, null, "no main application defined");
             if ($mainApplication->getVal("id_pm") != $this->getId()) return array(null, null, "id of domain in main application is different than this DOMAIN-ID");
 
@@ -307,7 +307,7 @@ class Domain extends AFWObject
              * @var Module $mainApplication
              */
 
-            $mainApplication = $this->get("mainApplication");
+            $mainApplication = $this->calcMainApplication();
             if (!$mainApplication) return array(null, null, "no main application defined");
             if ($mainApplication->getVal("id_pm") != $this->getId()) return array(null, null, "id of domain in main application is different than this DOMAIN-ID");
 
@@ -360,57 +360,50 @@ class Domain extends AFWObject
             return true;
       }
 
-      public function getFormuleResult($attribute, $what = 'value')
+
+      public function calcMainApplication($what = 'object')
       {
-            global $me, $server_db_prefix;
-
-            $file_dir_name = dirname(__FILE__);
-
-
-
-            switch ($attribute) {
-                  case "mainApplication":
-
-                        $application_code = strtolower($this->getVal("application_code"));
-                        $domain_code = strtolower($this->getVal("domain_code"));
-                        if (!$application_code) {
-                              $application_code = $domain_code . "u";
-                        }
-
-                        $mainApplication = new Module();
-
-
-                        $mainApplication->clearSelect();
-                        $mainApplication->where("avail='Y' and id_module_type = 5 and (module_code='$application_code' or module_code='$domain_code')");
-                        $mainApplication->load();
-
-                        return $mainApplication;
-                        break;
+            $application_code = strtolower($this->getVal("application_code"));
+            $domain_code = strtolower($this->getVal("domain_code"));
+            if (!$application_code) {
+                  $application_code = $domain_code . "u";
             }
+
+            $mainApplication = new Module();
+
+
+            $mainApplication->clearSelect();
+            $mainApplication->where("avail='Y' and id_module_type = 5 and (module_code='$application_code' or module_code='$domain_code')");
+            if (!$mainApplication->load()) $mainApplication = null;
+
+            return AfwLoadHelper::giveWhat($mainApplication, $what);
       }
 
+
       /**
-         * @param int $atable_id
-         */
-      public function tableIsManagedByAtLeastOneGoal($atable_id) {
+       * @param int $atable_id
+       */
+      public function tableIsManagedByAtLeastOneGoal($atable_id)
+      {
             $goalList = $this->get("goalList");
             /**
              * @var Goal $goalItem
              */
-            foreach($goalList as $goalItem) {
-                  if($goalItem->tableIsManaged($atable_id)) return true;
+            foreach ($goalList as $goalItem) {
+                  if ($goalItem->tableIsManaged($atable_id)) return true;
             }
 
             return false;
       }
 
 
-      public function calcNon_managed_tables($what="value") {
+      public function calcNon_managed_tables($what = "value")
+      {
             /**
              * @var Module $mainApplication
              */
 
-            $mainApplication = $this->get("mainApplication");
+            $mainApplication = $this->calcMainApplication();
             if (!$mainApplication) return "no main application defined";
 
             $return_html = "";
@@ -418,19 +411,19 @@ class Domain extends AFWObject
             $lookup_html = "";
             // tables
             $tableList = $mainApplication->get("tbs");
-            foreach($tableList as $tableItem) {
-                  $table_html .= $tableItem->getVal("atable_name").", ";      
+            foreach ($tableList as $tableItem) {
+                  $table_html .= $tableItem->getVal("atable_name") . ", ";
             }
 
             // lookups
             $lookupList = $mainApplication->get("lkps");
-            foreach($lookupList as $tableItem) {
-                  $lookup_html .= $tableItem->getVal("atable_name").", ";      
+            foreach ($lookupList as $tableItem) {
+                  $lookup_html .= $tableItem->getVal("atable_name") . ", ";
             }
 
-            if($table_html) $return_html .= "TABLES NOT MANAGED : $table_html <BR>\n";
-            if($lookup_html) $return_html .= "LOOKUPS NOT MANAGED : $lookup_html <BR>\n";
-            if(!$return_html) $return_html = "well done all is managed";
+            if ($table_html) $return_html .= "TABLES NOT MANAGED : $table_html <BR>\n";
+            if ($lookup_html) $return_html .= "LOOKUPS NOT MANAGED : $lookup_html <BR>\n";
+            if (!$return_html) $return_html = "well done all is managed";
 
             return $return_html;
       }
