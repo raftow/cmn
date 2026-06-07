@@ -190,8 +190,68 @@ class Domain extends AFWObject
                         // 'STEP' => $this->stepOfAttribute('employee_id')
                   );
 
+            $color = 'yellow';
+            $title_ar = "توليد مخططات الوحدة من الأهداف";
+            $methodName = 'generateSchemaFromGoals';
+            $pbms[AfwStringHelper::hzmEncode($methodName)] =
+                  array(
+                        'METHOD' => $methodName,
+                        'COLOR' => $color,
+                        'LABEL_AR' => $title_ar,
+                        'ADMIN-ONLY' => true,
+                        'BF-ID' => '',
+                        'TITLE-LENGTH' => 72,
+                        // 'STEP' => $this->stepOfAttribute('employee_id')
+                  );
+
+                  
+
 
             return $pbms;
+      }
+
+      public function generateSchemaFromGoals($lang = "ar")
+      {
+            UfwQueryAnalyzer::startProcessLourdMode();
+            $goalList = $this->get("goalList");
+            $errors = array();
+            $infos = array();
+            $warnings = array();
+            /**
+             * @var Goal $goalItem
+             */
+            foreach ($goalList as $goalItem) {
+                  // for each goal we create a module with code = "sf"+goal_code and name = goal_name
+                  // sfg means "schema for goal" 
+                  $schema_code = "sfg".$goalItem->id;
+                  $schema_name_ar = $goalItem->getVal("goal_name_ar");
+                  $schema_name_en = $goalItem->getVal("goal_name_en");
+                  $schema_desc_ar = $goalItem->getVal("goal_desc_ar");
+                  $schema_desc_en = $goalItem->getVal("goal_desc_en");
+                  $schema_atable_mfk = $goalItem->getVal("atable_mfk");
+                  
+                  
+
+                  $schemaItem = Module::loadByMainIndex($schema_code, true);
+                  if (!$schemaItem) {
+                        $errors[] = "generateSchemaFromGoals : Module creation with loadByMainIndex($schema_code, true) failed";
+                        continue;
+                  } else {
+                        $schemaItem->set("id_module_type", Module::$MODULE_TYPE_SCHEMA_SUB_MODULE);
+                        $schemaItem->set("titre_short", $schema_name_ar);
+                        $schemaItem->set("titre_short_en", $schema_name_en);
+                        $schemaItem->set("titre", $schema_desc_ar);
+                        $schemaItem->set("titre_en", $schema_desc_en);
+                        $schema_atable_arr = explode(",", $schema_atable_mfk);
+                        $schemaItem->addRemoveInMfk("schema_atable_mfk", $schema_atable_arr, []);
+                        $schemaItem->updateSchemaMainAtableId();
+                        $schemaItem->update();
+                  }
+            }
+
+            UfwQueryAnalyzer::stopProcessLourdMode();
+
+            return AfwFormatHelper::pbm_result($errors, $infos, $warnings);
       }
 
       public function generateOriginalGoals($lang = "ar")
@@ -412,12 +472,14 @@ class Domain extends AFWObject
             // tables
             $tableList = $mainApplication->get("tbs");
             foreach ($tableList as $tableItem) {
+                  if(!$this->tableIsManagedByAtLeastOneGoal($tableItem->getId()))
                   $table_html .= $tableItem->getVal("atable_name") . ", ";
             }
 
             // lookups
             $lookupList = $mainApplication->get("lkps");
             foreach ($lookupList as $tableItem) {
+                  if(!$this->tableIsManagedByAtLeastOneGoal($tableItem->getId()))
                   $lookup_html .= $tableItem->getVal("atable_name") . ", ";
             }
 
