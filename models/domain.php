@@ -36,7 +36,7 @@ class Domain extends AFWObject
       public static $DOMAIN_ADMISSION = 25;                                 //التسجيل والقبول - application & admission                     
 
       private static $goalList = [];
-      
+
       public function __construct()
       {
             parent::__construct("domain", "id", "cmn");
@@ -206,10 +206,47 @@ class Domain extends AFWObject
                         // 'STEP' => $this->stepOfAttribute('employee_id')
                   );
 
-                  
+            $color = 'orange';
+            $title_ar = "توليد الوظائف من الأهداف";
+            $methodName = 'generateUserBFsFromGoals';
+            $pbms[AfwStringHelper::hzmEncode($methodName)] =
+                  array(
+                        'METHOD' => $methodName,
+                        'COLOR' => $color,
+                        'LABEL_AR' => $title_ar,
+                        'ADMIN-ONLY' => true,
+                        'BF-ID' => '',
+                        'TITLE-LENGTH' => 72,
+                        // 'STEP' => $this->stepOfAttribute('employee_id')
+                  );
+
+
+
+
 
 
             return $pbms;
+      }
+
+      public function generateUserBFsFromGoals($lang = "ar")
+      {
+            UfwQueryAnalyzer::startProcessLourdMode();
+            $goalList = $this->get("goalList");
+            $errors = array();
+            $infos = array();
+            $warnings = array();
+            /**
+             * @var Goal $goalItem
+             */
+            foreach ($goalList as $goalItem) {
+                  list($error, $info) = $goalItem->resetUserBFs($lang);
+                  if ($error) $errors[] = "resetUserBFs error : " . $error;
+                  if ($info) $infos[] = $info;
+            }
+
+            UfwQueryAnalyzer::stopProcessLourdMode();
+
+            return AfwFormatHelper::pbm_result($errors, $infos, $warnings);
       }
 
       public function generateSchemaFromGoals($lang = "ar")
@@ -225,14 +262,14 @@ class Domain extends AFWObject
             foreach ($goalList as $goalItem) {
                   // for each goal we create a module with code = "sf"+goal_code and name = goal_name
                   // sfg means "schema for goal" 
-                  $schema_code = "sfg".$goalItem->id;
+                  $schema_code = "sfg" . $goalItem->id;
                   $schema_name_ar = $goalItem->getVal("goal_name_ar");
                   $schema_name_en = $goalItem->getVal("goal_name_en");
                   $schema_desc_ar = $goalItem->getVal("goal_desc_ar");
                   $schema_desc_en = $goalItem->getVal("goal_desc_en");
                   $schema_atable_mfk = $goalItem->getVal("atable_mfk");
-                  
-                  
+
+
 
                   $schemaItem = Module::loadByMainIndex($schema_code, true);
                   if (!$schemaItem) {
@@ -447,7 +484,7 @@ class Domain extends AFWObject
        */
       public function tableIsManagedByAtLeastOneGoal($atable_id)
       {
-            if(!self::$goalList[$this->id]) self::$goalList[$this->id] = $this->get("goalList");
+            if (!self::$goalList[$this->id]) self::$goalList[$this->id] = $this->get("goalList");
             /**
              * @var Goal $goalItem
              */
@@ -474,15 +511,15 @@ class Domain extends AFWObject
             // tables
             $tableList = $mainApplication->get("tbs");
             foreach ($tableList as $tableItem) {
-                  if(!$this->tableIsManagedByAtLeastOneGoal($tableItem->getId()))
-                  $table_html .= $tableItem->getVal("atable_name") . ", ";
+                  if (!$this->tableIsManagedByAtLeastOneGoal($tableItem->getId()))
+                        $table_html .= $tableItem->getVal("atable_name") . ", ";
             }
 
             // lookups
             $lookupList = $mainApplication->get("lkps");
             foreach ($lookupList as $tableItem) {
-                  if(!$this->tableIsManagedByAtLeastOneGoal($tableItem->getId()))
-                  $lookup_html .= $tableItem->getVal("atable_name") . ", ";
+                  if (!$this->tableIsManagedByAtLeastOneGoal($tableItem->getId()))
+                        $lookup_html .= $tableItem->getVal("atable_name") . ", ";
             }
 
             if ($table_html) $return_html .= "TABLES NOT MANAGED : $table_html <BR>\n";
