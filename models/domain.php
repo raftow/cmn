@@ -35,6 +35,8 @@ class Domain extends AFWObject
       public static $DOMAIN_LICENSE = 24;                                   //إدارة التراخيص - licenses management                          
       public static $DOMAIN_ADMISSION = 25;                                 //التسجيل والقبول - application & admission                     
 
+      private static $goalList = [];
+      
       public function __construct()
       {
             parent::__construct("domain", "id", "cmn");
@@ -445,11 +447,11 @@ class Domain extends AFWObject
        */
       public function tableIsManagedByAtLeastOneGoal($atable_id)
       {
-            $goalList = $this->get("goalList");
+            if(!self::$goalList[$this->id]) self::$goalList[$this->id] = $this->get("goalList");
             /**
              * @var Goal $goalItem
              */
-            foreach ($goalList as $goalItem) {
+            foreach (self::$goalList[$this->id] as $goalItem) {
                   if ($goalItem->tableIsManaged($atable_id)) return true;
             }
 
