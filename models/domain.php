@@ -249,6 +249,35 @@ class Domain extends AFWObject
             return AfwFormatHelper::pbm_result($errors, $infos, $warnings);
       }
 
+      public function generateNewRolesFromGoals($lang = "ar")
+      {
+
+            UfwQueryAnalyzer::startProcessLourdMode();
+            $objModule = $this->calcMainApplication();
+            if (!$objModule or (!$objModule->id)) return ["generateNewRolesFromGoals : main application not found", ""];
+
+            $goalList = $this->get("goalList");
+            $errors = array();
+            $infos = array();
+            $warnings = array();
+            /**
+             * @var Goal $goalItem
+             */
+            foreach ($goalList as $goalItem) {
+                  $module_id = $objModule->id;
+                  $system_id = $objModule->getVal("id_system");
+                  $new_role_code = $goalItem->getVal("goal_code");
+                  $nrObj = NewRole::loadByMainIndex($system_id, $module_id, $new_role_code, true);
+                  if (!$nrObj) $errors[] = "failed to create new role request ($system_id, $module_id, $new_role_code)";
+                  elseif ($nrObj->is_new) $infos[] = $nrObj->getShortDisplay($lang) . " has been created";
+                  else $warnings[] = $nrObj->getShortDisplay($lang) . " has been updated";
+            }
+
+            UfwQueryAnalyzer::stopProcessLourdMode();
+
+            return AfwFormatHelper::pbm_result($errors, $infos, $warnings);
+      }
+
       public function generateSchemaFromGoals($lang = "ar")
       {
             UfwQueryAnalyzer::startProcessLourdMode();
