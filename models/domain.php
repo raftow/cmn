@@ -220,6 +220,20 @@ class Domain extends AFWObject
                         // 'STEP' => $this->stepOfAttribute('employee_id')
                   );
 
+            $color = 'green';
+            $title_ar = "توليد تجهيزات المجموعات من الأهداف";
+            $methodName = 'generateNewRolesFromGoals';
+            $pbms[AfwStringHelper::hzmEncode($methodName)] =
+                  array(
+                        'METHOD' => $methodName,
+                        'COLOR' => $color,
+                        'LABEL_AR' => $title_ar,
+                        'ADMIN-ONLY' => true,
+                        'BF-ID' => '',
+                        'TITLE-LENGTH' => 72,
+                        // 'STEP' => $this->stepOfAttribute('employee_id')
+                  );
+
 
 
 
