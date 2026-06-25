@@ -279,17 +279,23 @@ class Domain extends AFWObject
              */
             foreach ($goalList as $goalItem) {
                   $atable_mfk_trimmed = trim(trim($goalItem->getVal('atable_mfk')), ",");
+                  $module_id = $objModule->id;
+                  $system_id = $objModule->getVal("id_system");
+                  $new_role_code = $goalItem->getVal("goal_code");
                   if ($atable_mfk_trimmed) {
-                        $module_id = $objModule->id;
-                        $system_id = $objModule->getVal("id_system");
-                        $new_role_code = $goalItem->getVal("goal_code");
+
                         $nrObj = NewRole::loadByMainIndex($system_id, $module_id, $new_role_code, true);
                         $nrObj->set('domain_id', $this->id);
                         $nrObj->update();
                         if (!$nrObj) $errors[] = "failed to create new role request ($system_id, $module_id, $new_role_code)";
                         elseif ($nrObj->is_new) $infos[] = $nrObj->getShortDisplay($lang) . " has been created";
                         else $warnings[] = $nrObj->getShortDisplay($lang) . " has been updated";
-                  } else $errors[] = $goalItem->getShortDisplay($lang) . " has no table";
+                  } else {
+                        $errors[] = $goalItem->getShortDisplay($lang) . " has no table";
+                        $nrObj = NewRole::loadByMainIndex($system_id, $module_id, $new_role_code);
+
+                        if ($nrObj) $nrObj->logicDelete();
+                  }
             }
 
             UfwQueryAnalyzer::stopProcessLourdMode();
