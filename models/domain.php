@@ -282,6 +282,8 @@ class Domain extends AFWObject
                   $system_id = $objModule->getVal("id_system");
                   $new_role_code = $goalItem->getVal("goal_code");
                   $nrObj = NewRole::loadByMainIndex($system_id, $module_id, $new_role_code, true);
+                  $nrObj->set('domain_id', $this->id);
+                  $nrObj->update();
                   if (!$nrObj) $errors[] = "failed to create new role request ($system_id, $module_id, $new_role_code)";
                   elseif ($nrObj->is_new) $infos[] = $nrObj->getShortDisplay($lang) . " has been created";
                   else $warnings[] = $nrObj->getShortDisplay($lang) . " has been updated";
