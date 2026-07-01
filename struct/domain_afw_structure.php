@@ -216,6 +216,18 @@ class CmnDomainAfwStructure
                         'CSS' => 'width_pct_100',
                 ),
 
+		'migration_export' => array(
+                        'STEP' => 4,
+                        'TYPE' => 'TEXT',
+                        'CATEGORY' => 'FORMULA',
+                        'SHOW' => true,
+                        'EDIT' => true,
+                        'READONLY' => true,
+                        'CAN-BE-SETTED' => false,
+                        'SIZE' => 255,
+                        'CSS' => 'width_pct_100',
+                ),
+
 		'avail' => array(
 			'IMPORTANT' => 'IN',
 			'SHOW-ADMIN' => true,

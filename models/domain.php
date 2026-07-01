@@ -44,7 +44,7 @@ class Domain extends AFWObject
             $this->DISPLAY_FIELD = "domain_name_ar";
             $this->ORDER_BY_FIELDS = "domain_name_ar";
             $this->editByStep = true;
-            $this->editNbSteps = 3;
+            $this->editNbSteps = 4;
             $this->UNIQUE_KEY = array('domain_code');
             $this->ENABLE_DISPLAY_MODE_IN_QEDIT = true;
       }
@@ -560,25 +560,91 @@ class Domain extends AFWObject
             if (!$mainApplication) return "no main application defined";
 
             $return_html = "";
-            $table_html = "";
-            $lookup_html = "";
+            $not_managed_table_html = "";
+            $not_managed_lookup_html = "";
             // tables
             $tableList = $mainApplication->get("tbs");
             foreach ($tableList as $tableItem) {
                   if (!$this->tableIsManagedByAtLeastOneGoal($tableItem->getId()))
-                        $table_html .= $tableItem->getVal("atable_name") . ", ";
+                        $not_managed_table_html .= $tableItem->getVal("atable_name") . ", ";
             }
 
             // lookups
             $lookupList = $mainApplication->get("lkps");
             foreach ($lookupList as $tableItem) {
                   if (!$this->tableIsManagedByAtLeastOneGoal($tableItem->getId()))
-                        $lookup_html .= $tableItem->getVal("atable_name") . ", ";
+                        $not_managed_lookup_html .= $tableItem->getVal("atable_name") . ", ";
             }
 
-            if ($table_html) $return_html .= "TABLES NOT MANAGED : $table_html <BR>\n";
-            if ($lookup_html) $return_html .= "LOOKUPS NOT MANAGED : $lookup_html <BR>\n";
+            if ($not_managed_table_html) $return_html .= "TABLES NOT MANAGED : $not_managed_table_html <BR>\n";
+            if ($not_managed_lookup_html) $return_html .= "LOOKUPS NOT MANAGED : $not_managed_lookup_html <BR>\n";
             if (!$return_html) $return_html = "well done all is managed";
+
+            return $return_html;
+      }
+
+      public function calcMigration_export($what = "value")
+      {
+            /**
+             * @var Module $mainApplication
+             */
+
+            $mainApplication = $this->calcMainApplication();
+            if (!$mainApplication) return "no main application defined";
+
+            $return_html = "";
+            $not_managed_table_html = "";
+            $not_managed_lookup_html = "";
+            $php = "<?<br>\n";
+
+            $jobroleList = $this->get("jobroleList");
+            $php .= "// Job roles of domain : " . $this->getVal("domain_code") . "<br>\n";
+            $php .= Migration::genereUpdateDataMigration($jobroleList)."<br>\n";
+
+            $goalList = $this->get("goalList");
+            $php .= "// Goals of domain : " . $this->getVal("domain_code") . "<br>\n";
+            $php .= Migration::genereUpdateDataMigration($goalList)."<br>\n";
+
+            // all roles and subroles of main application
+            $roleList = $mainApplication->get("allRolesAndSubRoles");
+            $php .= "// Roles of application : " . $mainApplication->getVal("module_code") . "<br>\n";
+            $php .= Migration::genereUpdateDataMigration($roleList)."<br>\n";
+            
+            // all BFs of main application
+            $bfList = $mainApplication->get("mybfs");
+            $php .= "// BFs of application : " . $mainApplication->getVal("module_code") . "<br>\n";
+            $php .= Migration::genereUpdateDataMigration($bfList)."<br>\n";
+            
+
+            // tables of main application
+            $php .= "// Tables of application : " . $mainApplication->getVal("module_code") . "<br>\n";
+            $tableList = $mainApplication->get("tbs");
+            foreach ($tableList as $tableItem) {
+                  if (!$this->tableIsManagedByAtLeastOneGoal($tableItem->getId()))
+                        $not_managed_table_html .= $tableItem->getVal("atable_name") . ", ";
+                  else { 
+                        
+                  }
+            }
+            $php .= Migration::genereUpdateDataMigration($tableList)."<br>\n";
+
+            // lookups of main application
+            $lookupList = $mainApplication->get("lkps");
+            $php .= "// Lookups of application : " . $mainApplication->getVal("module_code") . "<br>\n";
+            foreach ($lookupList as $tableItem) {
+                  if (!$this->tableIsManagedByAtLeastOneGoal($tableItem->getId()))
+                        $not_managed_lookup_html .= $tableItem->getVal("atable_name") . ", ";
+                  else { 
+                        
+                  }
+            }
+            $php .= Migration::genereUpdateDataMigration($lookupList)."<br>\n";
+
+            if ($not_managed_table_html) $return_html .= "// TABLES NOT MANAGED : $not_managed_table_html <BR>\n";
+            if ($not_managed_lookup_html) $return_html .= "// LOOKUPS NOT MANAGED : $not_managed_lookup_html <BR>\n";
+            if (!$return_html) $return_html = "// well done all tables are managed";
+
+            $return_html .= $php;
 
             return $return_html;
       }

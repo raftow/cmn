@@ -21,3 +21,7 @@ $trad["domain"]["goalList"] = "الأهداف";
 $trad["domain"]["step1"] = "الرموز والمسمى";
 $trad["domain"]["step2"] = "الصلاحيات";
 $trad["domain"]["step3"] = "الأهداف";
+
+$trad["domain"]["step4"] = "تصدير الهجرة";
+$trad["domain"]["migration_export"] = "تصدير الهجرة";
+
