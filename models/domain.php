@@ -598,26 +598,26 @@ class Domain extends AFWObject
             $php = "<?\n<br>";
 
             $jobroleList = $this->get("jobroleList");
-            $php .= "// Job roles of domain : " . $this->getVal("domain_code") . "<br>\n";
-            $php .= Migration::genereUpdateDataMigration($jobroleList)."<br>\n";
+            $php .= "// Job roles of domain : " . $this->getVal("domain_code") . "\n";
+            $php .= Migration::genereUpdateDataMigration($jobroleList)."\n";
 
             $goalList = $this->get("goalList");
-            $php .= "// Goals of domain : " . $this->getVal("domain_code") . "<br>\n";
-            $php .= Migration::genereUpdateDataMigration($goalList)."<br>\n";
+            $php .= "// Goals of domain : " . $this->getVal("domain_code") . "\n";
+            $php .= Migration::genereUpdateDataMigration($goalList)."\n";
 
             // all roles and subroles of main application
             $roleList = $mainApplication->get("allRolesAndSubRoles");
-            $php .= "// Roles of application : " . $mainApplication->getVal("module_code") . "<br>\n";
-            $php .= Migration::genereUpdateDataMigration($roleList)."<br>\n";
+            $php .= "// Roles of application : " . $mainApplication->getVal("module_code") . "\n";
+            $php .= Migration::genereUpdateDataMigration($roleList)."\n";
             
             // all BFs of main application
             $bfList = $mainApplication->get("mybfs");
-            $php .= "// BFs of application : " . $mainApplication->getVal("module_code") . "<br>\n";
-            $php .= Migration::genereUpdateDataMigration($bfList)."<br>\n";
+            $php .= "// BFs of application : " . $mainApplication->getVal("module_code") . "\n";
+            $php .= Migration::genereUpdateDataMigration($bfList)."\n";
             
 
             // tables of main application
-            $php .= "// Tables of application : " . $mainApplication->getVal("module_code") . "<br>\n";
+            $php .= "// Tables of application : " . $mainApplication->getVal("module_code") . "\n";
             $tableList = $mainApplication->get("tbs");
             foreach ($tableList as $tableItem) {
                   if (!$this->tableIsManagedByAtLeastOneGoal($tableItem->getId()))
@@ -626,7 +626,7 @@ class Domain extends AFWObject
                         
                   }
             }
-            $php .= Migration::genereUpdateDataMigration($tableList)."<br>\n";
+            $php .= Migration::genereUpdateDataMigration($tableList)."\n";
 
             // lookups of main application
             $lookupList = $mainApplication->get("lkps");
@@ -638,13 +638,13 @@ class Domain extends AFWObject
                         
                   }
             }
-            $php .= Migration::genereUpdateDataMigration($lookupList)."<br>\n";
+            $php .= Migration::genereUpdateDataMigration($lookupList)."\n";
 
             if ($not_managed_table_html) $return_html .= "// TABLES NOT MANAGED : $not_managed_table_html <BR>\n";
             if ($not_managed_lookup_html) $return_html .= "// LOOKUPS NOT MANAGED : $not_managed_lookup_html <BR>\n";
             if (!$return_html) $return_html = "// well done all tables are managed";
 
-            $return_html .= highlight_string($php, true);
+            $return_html .= "<pre class=\"language-php\">".highlight_string($php, true)."</pre>";
 
             return $return_html;
       }
