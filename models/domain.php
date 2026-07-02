@@ -596,6 +596,9 @@ class Domain extends AFWObject
             $not_managed_table_html = "";
             $not_managed_lookup_html = "";
             $php = "<?\n";
+            $php .= "if (!class_exists(\"AfwSession\")) die(\"Denied access\");\n";
+            $php .= "try {\n";
+        
 
             $jobroleList = $this->get("jobroleList");
             $php .= "// Job roles of domain : " . $this->getVal("domain_code") . "\n";
@@ -640,11 +643,15 @@ class Domain extends AFWObject
             }
             $php .= Migration::genereUpdateDataMigration($lookupList)."\n";
 
+            $php .= "} catch (Exception \$e) {\n";
+            $php .= "    \$migration_error = \" \" . \$e->getMessage();\n";
+            $php .= "}\n";
+
             if ($not_managed_table_html) $return_html .= "// TABLES NOT MANAGED : $not_managed_table_html <BR>\n";
             if ($not_managed_lookup_html) $return_html .= "// LOOKUPS NOT MANAGED : $not_managed_lookup_html <BR>\n";
             if (!$return_html) $return_html = "// well done all tables are managed";
             // highlight_string(, true)
-            $return_html .= "<textarea class=\"language-php\">".$php."</textarea>";
+            $return_html .= "<textarea id='phpmig' class=\"language-php\">".$php."</textarea>";
 
             return $return_html;
       }
