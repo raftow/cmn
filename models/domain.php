@@ -595,7 +595,7 @@ class Domain extends AFWObject
             $return_html = "";
             $not_managed_table_html = "";
             $not_managed_lookup_html = "";
-            $php = "<?\n";
+            $php = "<?php\n";
             $php .= "if (!class_exists(\"AfwSession\")) die(\"Denied access\");\n";
             $php .= "try {\n";
         
